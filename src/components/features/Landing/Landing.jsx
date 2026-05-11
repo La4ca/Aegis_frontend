@@ -66,7 +66,8 @@ const Landing = () => {
     if (count >= 50) return "50+";
     if (count >= 20) return "20+";
     if (count >= 10) return "10+";
-    return count.toString();
+    return count.toString() ?? "0";
+    // return count.toString();
   };
 
   const openAuthModal = (mode) => {
