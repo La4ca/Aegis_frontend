@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { Heart } from 'lucide-react';
-import LegalModal from '../../common/LegalModal/LegalModal';
-import './Footer.css';
+import React, { useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import LegalModal from "../../common/LegalModal/LegalModal";
+import "./Footer.css";
 
 const Footer = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -18,16 +17,28 @@ const Footer = () => {
             <span>AEGIS</span>
           </div>
           <div className="footer-links">
-            <button onClick={() => openModal('privacy')} className="footer-link-btn">
+            <button
+              onClick={() => openModal("privacy")}
+              className="footer-link-btn"
+            >
               Privacy Policy
             </button>
-            <button onClick={() => openModal('terms')} className="footer-link-btn">
+            <button
+              onClick={() => openModal("terms")}
+              className="footer-link-btn"
+            >
               Terms of Service
             </button>
-            <button onClick={() => openModal('hipaa')} className="footer-link-btn">
+            <button
+              onClick={() => openModal("hipaa")}
+              className="footer-link-btn"
+            >
               HIPAA Compliance
             </button>
-            <button onClick={() => openModal('contact')} className="footer-link-btn">
+            <button
+              onClick={() => openModal("contact")}
+              className="footer-link-btn"
+            >
               Contact Support
             </button>
           </div>
@@ -38,9 +49,7 @@ const Footer = () => {
       </footer>
 
       <AnimatePresence>
-        {activeModal && (
-          <LegalModal type={activeModal} onClose={closeModal} />
-        )}
+        {activeModal && <LegalModal type={activeModal} onClose={closeModal} />}
       </AnimatePresence>
     </>
   );
