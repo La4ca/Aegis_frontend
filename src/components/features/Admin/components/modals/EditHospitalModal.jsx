@@ -1,92 +1,98 @@
 // frontend/src/components/features/Admin/components/modals/EditHospitalModal.jsx
-import React, { useState, useEffect } from 'react';
-import { X, Building, Phone, Mail, MapPin, AlertCircle } from 'lucide-react';
-import api from '../../../../../utils/api';
-import './Modal.css';
+import React, { useState, useEffect } from "react";
+import { X, Building, Phone, Mail, MapPin, AlertCircle } from "lucide-react";
+import api from "../../../../../services/api";
+import "./Modal.css";
 
 const EditHospitalModal = ({ isOpen, onClose, editingHospital, onSuccess }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
     address: {
-      street: '',
-      city: '',
-      province: '',
-      zipCode: '',
-      country: 'Philippines'
+      street: "",
+      city: "",
+      province: "",
+      zipCode: "",
+      country: "Philippines",
     },
-    phone: '',
-    email: ''
+    phone: "",
+    email: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (editingHospital && isOpen) {
       let address = {
-        street: '',
-        city: '',
-        province: '',
-        zipCode: '',
-        country: 'Philippines'
+        street: "",
+        city: "",
+        province: "",
+        zipCode: "",
+        country: "Philippines",
       };
-      
-      if (typeof editingHospital.address === 'string') {
+
+      if (typeof editingHospital.address === "string") {
         address.street = editingHospital.address;
-      } else if (editingHospital.address && typeof editingHospital.address === 'object') {
+      } else if (
+        editingHospital.address &&
+        typeof editingHospital.address === "object"
+      ) {
         address = {
-          street: editingHospital.address.street || '',
-          city: editingHospital.address.city || '',
-          province: editingHospital.address.province || editingHospital.address.state || '',
-          zipCode: editingHospital.address.zipCode || '',
-          country: editingHospital.address.country || 'Philippines'
+          street: editingHospital.address.street || "",
+          city: editingHospital.address.city || "",
+          province:
+            editingHospital.address.province ||
+            editingHospital.address.state ||
+            "",
+          zipCode: editingHospital.address.zipCode || "",
+          country: editingHospital.address.country || "Philippines",
         };
       }
-      
+
       setFormData({
-        name: editingHospital.name || '',
+        name: editingHospital.name || "",
         address: address,
-        phone: editingHospital.phone || '',
-        email: editingHospital.email || ''
+        phone: editingHospital.phone || "",
+        email: editingHospital.email || "",
       });
     }
   }, [editingHospital, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name.startsWith('address.')) {
-      const field = name.split('.')[1];
-      setFormData(prev => ({
+    if (name.startsWith("address.")) {
+      const field = name.split(".")[1];
+      setFormData((prev) => ({
         ...prev,
-        address: { ...prev.address, [field]: value }
+        address: { ...prev.address, [field]: value },
       }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    
+    setError("");
+
     if (!formData.name.trim()) {
-      setError('Hospital name is required');
+      setError("Hospital name is required");
       setLoading(false);
       return;
     }
-    
+
     try {
       await api.put(`/admin/hospitals/${editingHospital._id}`, {
         name: formData.name,
         address: formData.address,
         phone: formData.phone,
-        email: formData.email
+        email: formData.email,
       });
-      
+
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update hospital');
+      setError(err.response?.data?.message || "Failed to update hospital");
     } finally {
       setLoading(false);
     }
@@ -98,10 +104,14 @@ const EditHospitalModal = ({ isOpen, onClose, editingHospital, onSuccess }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3><Building size={18} /> Edit Hospital: {editingHospital?.name}</h3>
-          <button className="close-btn" onClick={onClose}><X size={18} /></button>
+          <h3>
+            <Building size={18} /> Edit Hospital: {editingHospital?.name}
+          </h3>
+          <button className="close-btn" onClick={onClose}>
+            <X size={18} />
+          </button>
         </div>
-        
+
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
             {error && (
@@ -110,16 +120,18 @@ const EditHospitalModal = ({ isOpen, onClose, editingHospital, onSuccess }) => {
                 <span>{error}</span>
               </div>
             )}
-            
+
             {/* Hospital Information Section */}
             <div className="form-section">
               <div className="form-section-header">
                 <Building size={14} />
                 <span>Hospital Information</span>
               </div>
-              
+
               <div className="form-group">
-                <label><Building size={12} /> Hospital Name *</label>
+                <label>
+                  <Building size={12} /> Hospital Name *
+                </label>
                 <input
                   type="text"
                   name="name"
@@ -130,14 +142,14 @@ const EditHospitalModal = ({ isOpen, onClose, editingHospital, onSuccess }) => {
                 />
               </div>
             </div>
-            
+
             {/* Address Information Section */}
             <div className="form-section">
               <div className="form-section-header">
                 <MapPin size={14} />
                 <span>Address Information</span>
               </div>
-              
+
               <div className="form-group">
                 <label>Street Address</label>
                 <input
@@ -148,7 +160,7 @@ const EditHospitalModal = ({ isOpen, onClose, editingHospital, onSuccess }) => {
                   onChange={handleChange}
                 />
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label>City / Municipality</label>
@@ -171,7 +183,7 @@ const EditHospitalModal = ({ isOpen, onClose, editingHospital, onSuccess }) => {
                   />
                 </div>
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Zip Code</label>
@@ -195,17 +207,19 @@ const EditHospitalModal = ({ isOpen, onClose, editingHospital, onSuccess }) => {
                 </div>
               </div>
             </div>
-            
+
             {/* Contact Information Section */}
             <div className="form-section">
               <div className="form-section-header">
                 <Phone size={14} />
                 <span>Contact Information</span>
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
-                  <label><Phone size={12} /> Phone Number</label>
+                  <label>
+                    <Phone size={12} /> Phone Number
+                  </label>
                   <input
                     type="tel"
                     name="phone"
@@ -215,7 +229,9 @@ const EditHospitalModal = ({ isOpen, onClose, editingHospital, onSuccess }) => {
                   />
                 </div>
                 <div className="form-group">
-                  <label><Mail size={12} /> Email Address</label>
+                  <label>
+                    <Mail size={12} /> Email Address
+                  </label>
                   <input
                     type="email"
                     name="email"
@@ -226,11 +242,13 @@ const EditHospitalModal = ({ isOpen, onClose, editingHospital, onSuccess }) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="modal-actions">
-              <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
+              <button type="button" className="cancel-btn" onClick={onClose}>
+                Cancel
+              </button>
               <button type="submit" className="submit-btn" disabled={loading}>
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>

@@ -1,73 +1,73 @@
 // frontend/src/components/features/Admin/components/modals/HospitalModal.jsx
-import React, { useState, useEffect } from 'react';
-import { X, Building, Phone, Mail, MapPin, AlertCircle } from 'lucide-react';
-import api from '../../../../../utils/api';
-import './Modal.css';
+import React, { useState, useEffect } from "react";
+import { X, Building, Phone, Mail, MapPin, AlertCircle } from "lucide-react";
+import api from "../../../../../services/api";
+import "./Modal.css";
 
 const HospitalModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
     address: {
-      street: '',
-      city: '',
-      province: '',
-      zipCode: '',
-      country: 'Philippines'
+      street: "",
+      city: "",
+      province: "",
+      zipCode: "",
+      country: "Philippines",
     },
-    phone: '',
-    email: ''
+    phone: "",
+    email: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
       setFormData({
-        name: '',
+        name: "",
         address: {
-          street: '',
-          city: '',
-          province: '',
-          zipCode: '',
-          country: 'Philippines'
+          street: "",
+          city: "",
+          province: "",
+          zipCode: "",
+          country: "Philippines",
         },
-        phone: '',
-        email: ''
+        phone: "",
+        email: "",
       });
-      setError('');
+      setError("");
     }
   }, [isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name.startsWith('address.')) {
-      const field = name.split('.')[1];
-      setFormData(prev => ({
+    if (name.startsWith("address.")) {
+      const field = name.split(".")[1];
+      setFormData((prev) => ({
         ...prev,
-        address: { ...prev.address, [field]: value }
+        address: { ...prev.address, [field]: value },
       }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    
+    setError("");
+
     if (!formData.name.trim()) {
-      setError('Hospital name is required');
+      setError("Hospital name is required");
       setLoading(false);
       return;
     }
-    
+
     try {
-      await api.post('/admin/hospitals', formData);
+      await api.post("/admin/hospitals", formData);
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create hospital');
+      setError(err.response?.data?.message || "Failed to create hospital");
     } finally {
       setLoading(false);
     }
@@ -79,10 +79,14 @@ const HospitalModal = ({ isOpen, onClose, onSuccess }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3><Building size={18} /> Add New Hospital</h3>
-          <button className="close-btn" onClick={onClose}><X size={18} /></button>
+          <h3>
+            <Building size={18} /> Add New Hospital
+          </h3>
+          <button className="close-btn" onClick={onClose}>
+            <X size={18} />
+          </button>
         </div>
-        
+
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
             {error && (
@@ -91,13 +95,13 @@ const HospitalModal = ({ isOpen, onClose, onSuccess }) => {
                 <span>{error}</span>
               </div>
             )}
-            
+
             {/* Hospital Information Section */}
             <div className="form-section">
               <div className="form-section-header">
                 <span>Hospital Information</span>
               </div>
-              
+
               <div className="form-group">
                 <label>Hospital Name *</label>
                 <input
@@ -110,13 +114,13 @@ const HospitalModal = ({ isOpen, onClose, onSuccess }) => {
                 />
               </div>
             </div>
-            
+
             {/* Address Information Section */}
             <div className="form-section">
               <div className="form-section-header">
                 <span>Address Information</span>
               </div>
-              
+
               <div className="form-group">
                 <label>Street Address</label>
                 <input
@@ -127,7 +131,7 @@ const HospitalModal = ({ isOpen, onClose, onSuccess }) => {
                   onChange={handleChange}
                 />
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label>City / Municipality</label>
@@ -150,7 +154,7 @@ const HospitalModal = ({ isOpen, onClose, onSuccess }) => {
                   />
                 </div>
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Zip Code</label>
@@ -174,13 +178,13 @@ const HospitalModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               </div>
             </div>
-            
+
             {/* Contact Information Section */}
             <div className="form-section">
               <div className="form-section-header">
                 <span>Contact Information</span>
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label>Phone Number</label>
@@ -204,11 +208,13 @@ const HospitalModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="modal-actions">
-              <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
+              <button type="button" className="cancel-btn" onClick={onClose}>
+                Cancel
+              </button>
               <button type="submit" className="submit-btn" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Hospital'}
+                {loading ? "Creating..." : "Create Hospital"}
               </button>
             </div>
           </form>

@@ -1,55 +1,78 @@
 // frontend/src/components/features/Admin/AdminDashboard.jsx
-import React, { useState, useCallback } from 'react';
-import { useAdminData } from './hooks/useAdminData';
-import AdminSidebar from './components/AdminSidebar/AdminSidebar';
-import AdminHeader from './components/AdminHeader/AdminHeader';
-import AdminStats from './components/AdminStats/AdminStats';
-import OverviewTab from './components/OverviewTab/OverviewTab';
-import HospitalsTab from './components/HospitalsTab/HospitalsTab';
-import DoctorsTab from './components/DoctorsTab/DoctorsTab';
-import PatientsTab from './components/PatientsTab/PatientsTab';
-import SpecializationsTab from './components/SpecializationsTab/SpecializationsTab';
-import AdminAnalytics from './components/AdminAnalytics/AdminAnalytics';
-import HospitalModal from './components/modals/HospitalModal';
-import EditHospitalModal from './components/modals/EditHospitalModal';
-import DoctorModal from './components/modals/DoctorModal';
-import EditDoctorModal from './components/modals/EditDoctorModal';
-import PatientModal from './components/modals/PatientModal';
-import SpecializationModal from './components/modals/SpecializationModal';
-import ConfirmModal from '../../common/ConfirmModal/ConfirmModal';
-import DoctorDistributionChart from './components/DoctorDistributionChart/DoctorDistributionChart';
-import api from '../../../utils/api';
-import './AdminDashboard.css';
+import React, { useState, useCallback } from "react";
+import { useAdminData } from "./hooks/useAdminData";
+import AdminSidebar from "./components/AdminSidebar/AdminSidebar";
+import AdminHeader from "./components/AdminHeader/AdminHeader";
+import AdminStats from "./components/AdminStats/AdminStats";
+import OverviewTab from "./components/OverviewTab/OverviewTab";
+import HospitalsTab from "./components/HospitalsTab/HospitalsTab";
+import DoctorsTab from "./components/DoctorsTab/DoctorsTab";
+import PatientsTab from "./components/PatientsTab/PatientsTab";
+import SpecializationsTab from "./components/SpecializationsTab/SpecializationsTab";
+import AdminAnalytics from "./components/AdminAnalytics/AdminAnalytics";
+import HospitalModal from "./components/modals/HospitalModal";
+import EditHospitalModal from "./components/modals/EditHospitalModal";
+import DoctorModal from "./components/modals/DoctorModal";
+import EditDoctorModal from "./components/modals/EditDoctorModal";
+import PatientModal from "./components/modals/PatientModal";
+import SpecializationModal from "./components/modals/SpecializationModal";
+import ConfirmModal from "../../common/ConfirmModal/ConfirmModal";
+import DoctorDistributionChart from "./components/DoctorDistributionChart/DoctorDistributionChart";
+import api from "../../../services/api";
+import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
-  const [activePage, setActivePage] = useState('overview');
+  const [activePage, setActivePage] = useState("overview");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  
+
   // Modal states
-  const [hospitalModal, setHospitalModal] = useState({ isOpen: false, editingItem: null });
-  const [doctorModal, setDoctorModal] = useState({ isOpen: false, editingItem: null });
-  const [patientModal, setPatientModal] = useState({ isOpen: false, editingItem: null });
-  const [specializationModal, setSpecializationModal] = useState({ isOpen: false, editingItem: null });
-  
+  const [hospitalModal, setHospitalModal] = useState({
+    isOpen: false,
+    editingItem: null,
+  });
+  const [doctorModal, setDoctorModal] = useState({
+    isOpen: false,
+    editingItem: null,
+  });
+  const [patientModal, setPatientModal] = useState({
+    isOpen: false,
+    editingItem: null,
+  });
+  const [specializationModal, setSpecializationModal] = useState({
+    isOpen: false,
+    editingItem: null,
+  });
+
   const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('user');
+    const stored = localStorage.getItem("user");
     return stored ? JSON.parse(stored) : {};
   });
 
   // Global Confirm Modal State (SINGLE INSTANCE)
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
-    title: '',
-    message: '',
-    type: 'warning',
-    confirmText: 'Confirm',
-    cancelText: 'Cancel',
+    title: "",
+    message: "",
+    type: "warning",
+    confirmText: "Confirm",
+    cancelText: "Cancel",
     onConfirm: null,
   });
 
   const {
-    stats, recentPatients, recentDoctors, hospitals, doctors, allPatients, specializations,
-    loading, error, success, setError, setSuccess, fetchAllData
+    stats,
+    recentPatients,
+    recentDoctors,
+    hospitals,
+    doctors,
+    allPatients,
+    specializations,
+    loading,
+    error,
+    success,
+    setError,
+    setSuccess,
+    fetchAllData,
   } = useAdminData();
 
   const refreshData = useCallback(async () => {
@@ -90,7 +113,14 @@ const AdminDashboard = () => {
   };
 
   // Global confirm function
-  const showConfirm = (title, message, type, onConfirm, confirmText = 'Confirm', cancelText = 'Cancel') => {
+  const showConfirm = (
+    title,
+    message,
+    type,
+    onConfirm,
+    confirmText = "Confirm",
+    cancelText = "Cancel",
+  ) => {
     setConfirmModal({
       isOpen: true,
       title,
@@ -100,20 +130,20 @@ const AdminDashboard = () => {
       cancelText,
       onConfirm: () => {
         onConfirm();
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
       },
     });
   };
 
   const closeConfirmModal = () => {
-    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('userRole');
-    window.location.href = '/';
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userRole");
+    window.location.href = "/";
   };
 
   const handleSidebarToggle = (collapsed) => {
@@ -122,17 +152,17 @@ const AdminDashboard = () => {
 
   const handleUserUpdate = (updatedUser) => {
     setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
   const setSuccessMsg = (msg) => {
     setSuccess(msg);
-    setTimeout(() => setSuccess(''), 3000);
+    setTimeout(() => setSuccess(""), 3000);
   };
-  
+
   const setErrorMsg = (msg) => {
     setError(msg);
-    setTimeout(() => setError(''), 3000);
+    setTimeout(() => setError(""), 3000);
   };
 
   // ============================================
@@ -141,21 +171,21 @@ const AdminDashboard = () => {
   const handleDeleteHospital = async (id) => {
     try {
       await api.delete(`/admin/hospitals/${id}`);
-      setSuccessMsg('Hospital deleted successfully');
+      setSuccessMsg("Hospital deleted successfully");
       await refreshData();
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to delete hospital');
+      setErrorMsg(err.response?.data?.message || "Failed to delete hospital");
     }
   };
 
   const confirmDeleteHospital = (id, name) => {
     showConfirm(
-      'Delete Hospital',
+      "Delete Hospital",
       `Are you sure you want to permanently delete ${name}? This action cannot be undone.`,
-      'danger',
+      "danger",
       () => handleDeleteHospital(id),
-      'Delete',
-      'Cancel'
+      "Delete",
+      "Cancel",
     );
   };
 
@@ -168,40 +198,50 @@ const AdminDashboard = () => {
       setSuccessMsg(`Dr. ${doctorName} has been permanently deleted.`);
       await refreshData();
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to delete doctor');
+      setErrorMsg(err.response?.data?.message || "Failed to delete doctor");
     }
   };
 
   const confirmDeleteDoctor = (doctorId, doctorName) => {
     showConfirm(
-      'Delete Doctor',
+      "Delete Doctor",
       `Are you sure you want to permanently delete Dr. ${doctorName}? This action cannot be undone.`,
-      'danger',
+      "danger",
       () => handleDeleteDoctor(doctorId, doctorName),
-      'Delete',
-      'Cancel'
+      "Delete",
+      "Cancel",
     );
   };
 
-  const handleToggleDoctorStatus = async (doctorId, currentStatus, doctorName) => {
+  const handleToggleDoctorStatus = async (
+    doctorId,
+    currentStatus,
+    doctorName,
+  ) => {
     try {
-      await api.patch(`/admin/doctors/${doctorId}/status`, { isActive: !currentStatus });
-      setSuccessMsg(`Dr. ${doctorName} has been ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+      await api.patch(`/admin/doctors/${doctorId}/status`, {
+        isActive: !currentStatus,
+      });
+      setSuccessMsg(
+        `Dr. ${doctorName} has been ${!currentStatus ? "activated" : "deactivated"} successfully`,
+      );
       await refreshData();
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to update doctor status');
+      setErrorMsg(
+        err.response?.data?.message || "Failed to update doctor status",
+      );
     }
   };
 
   const confirmToggleDoctorStatus = (doctorId, currentStatus, doctorName) => {
-    const action = currentStatus ? 'deactivate' : 'activate';
+    const action = currentStatus ? "deactivate" : "activate";
     showConfirm(
-      `${currentStatus ? 'Deactivate' : 'Activate'} Doctor`,
+      `${currentStatus ? "Deactivate" : "Activate"} Doctor`,
       `Are you sure you want to ${action} Dr. ${doctorName}?`,
-      'warning',
+      "warning",
       () => handleToggleDoctorStatus(doctorId, currentStatus, doctorName),
-      'Confirm',
-      'Cancel'
+      "Confirm",
+      "Cancel",
     );
   };
 
@@ -214,40 +254,54 @@ const AdminDashboard = () => {
       setSuccessMsg(`${patientName} has been permanently deleted.`);
       await refreshData();
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to delete patient');
+      setErrorMsg(err.response?.data?.message || "Failed to delete patient");
     }
   };
 
   const confirmDeletePatient = (patientId, patientName) => {
     showConfirm(
-      'Delete Patient',
+      "Delete Patient",
       `Are you sure you want to permanently delete ${patientName}? This will also delete all their health records.`,
-      'danger',
+      "danger",
       () => handleDeletePatient(patientId, patientName),
-      'Delete',
-      'Cancel'
+      "Delete",
+      "Cancel",
     );
   };
 
-  const handleTogglePatientStatus = async (patientId, currentStatus, patientName) => {
+  const handleTogglePatientStatus = async (
+    patientId,
+    currentStatus,
+    patientName,
+  ) => {
     try {
-      await api.patch(`/admin/patients/${patientId}/status`, { isActive: !currentStatus });
-      setSuccessMsg(`${patientName} has been ${!currentStatus ? 'activated' : 'deactivated'} successfully`);
+      await api.patch(`/admin/patients/${patientId}/status`, {
+        isActive: !currentStatus,
+      });
+      setSuccessMsg(
+        `${patientName} has been ${!currentStatus ? "activated" : "deactivated"} successfully`,
+      );
       await refreshData();
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to update patient status');
+      setErrorMsg(
+        err.response?.data?.message || "Failed to update patient status",
+      );
     }
   };
 
-  const confirmTogglePatientStatus = (patientId, currentStatus, patientName) => {
-    const action = currentStatus ? 'deactivate' : 'activate';
+  const confirmTogglePatientStatus = (
+    patientId,
+    currentStatus,
+    patientName,
+  ) => {
+    const action = currentStatus ? "deactivate" : "activate";
     showConfirm(
-      `${currentStatus ? 'Deactivate' : 'Activate'} Patient`,
+      `${currentStatus ? "Deactivate" : "Activate"} Patient`,
       `Are you sure you want to ${action} ${patientName}?`,
-      'warning',
+      "warning",
       () => handleTogglePatientStatus(patientId, currentStatus, patientName),
-      'Confirm',
-      'Cancel'
+      "Confirm",
+      "Cancel",
     );
   };
 
@@ -260,80 +314,90 @@ const AdminDashboard = () => {
       setSuccessMsg(`Specialization "${name}" deleted successfully`);
       await refreshData();
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Failed to delete specialization');
+      setErrorMsg(
+        err.response?.data?.message || "Failed to delete specialization",
+      );
     }
   };
 
   const confirmDeleteSpecialization = (id, name) => {
     showConfirm(
-      'Delete Specialization',
+      "Delete Specialization",
       `Are you sure you want to permanently delete "${name}"? This may affect doctors with this specialization.`,
-      'danger',
+      "danger",
       () => handleDeleteSpecialization(id, name),
-      'Delete',
-      'Cancel'
+      "Delete",
+      "Cancel",
     );
   };
 
   const userData = user;
 
   const pageTitles = {
-    overview: 'Dashboard Overview',
-    hospitals: 'Hospital Management',
-    doctors: 'Doctor Management',
-    patients: 'Patient Management',
-    specializations: 'Specializations',
-    analytics: 'Analytics Dashboard'
+    overview: "Dashboard Overview",
+    hospitals: "Hospital Management",
+    doctors: "Doctor Management",
+    patients: "Patient Management",
+    specializations: "Specializations",
+    analytics: "Analytics Dashboard",
   };
 
   const renderContent = () => {
-    switch(activePage) {
-      case 'overview':
+    switch (activePage) {
+      case "overview":
         return (
           <>
-          <OverviewTab 
-          stats={stats}
-          recentPatients={recentPatients} 
-          recentDoctors={recentDoctors}
-          specializations={specializations}
-          doctors={doctors}
-        />
-      </>
+            <OverviewTab
+              stats={stats}
+              recentPatients={recentPatients}
+              recentDoctors={recentDoctors}
+              specializations={specializations}
+              doctors={doctors}
+            />
+          </>
         );
-      case 'hospitals':
-        return <HospitalsTab 
-          hospitals={hospitals} 
-          onAdd={() => openHospitalModal()} 
-          onEdit={(h) => openHospitalModal(h)} 
-          onDelete={confirmDeleteHospital}
-        />;
-      case 'doctors':
-        return <DoctorsTab 
-          doctors={doctors} 
-          patients={allPatients}
-          onAdd={() => openDoctorModal()} 
-          onEdit={(d) => openDoctorModal(d)} 
-          onDelete={confirmDeleteDoctor}
-          onToggleStatus={confirmToggleDoctorStatus}
-        />;
-      case 'patients':
-        return <PatientsTab 
-          patients={allPatients} 
-          doctors={doctors} 
-          onAdd={() => openPatientModal()} 
-          onEdit={(p) => openPatientModal(p)} 
-          onDelete={confirmDeletePatient}
-          onToggleStatus={confirmTogglePatientStatus}
-        />;
-      case 'specializations':
-        return <SpecializationsTab 
-          specializations={specializations} 
-          doctors={doctors}
-          onAdd={() => openSpecializationModal()} 
-          onEdit={(s) => openSpecializationModal(s)} 
-          onDelete={confirmDeleteSpecialization}
-        />;
-      case 'analytics':
+      case "hospitals":
+        return (
+          <HospitalsTab
+            hospitals={hospitals}
+            onAdd={() => openHospitalModal()}
+            onEdit={(h) => openHospitalModal(h)}
+            onDelete={confirmDeleteHospital}
+          />
+        );
+      case "doctors":
+        return (
+          <DoctorsTab
+            doctors={doctors}
+            patients={allPatients}
+            onAdd={() => openDoctorModal()}
+            onEdit={(d) => openDoctorModal(d)}
+            onDelete={confirmDeleteDoctor}
+            onToggleStatus={confirmToggleDoctorStatus}
+          />
+        );
+      case "patients":
+        return (
+          <PatientsTab
+            patients={allPatients}
+            doctors={doctors}
+            onAdd={() => openPatientModal()}
+            onEdit={(p) => openPatientModal(p)}
+            onDelete={confirmDeletePatient}
+            onToggleStatus={confirmTogglePatientStatus}
+          />
+        );
+      case "specializations":
+        return (
+          <SpecializationsTab
+            specializations={specializations}
+            doctors={doctors}
+            onAdd={() => openSpecializationModal()}
+            onEdit={(s) => openSpecializationModal(s)}
+            onDelete={confirmDeleteSpecialization}
+          />
+        );
+      case "analytics":
         return <AdminAnalytics />;
       default:
         return null;
@@ -342,72 +406,74 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard-container">
-      <AdminSidebar 
-        activePage={activePage} 
-        onPageChange={setActivePage} 
+      <AdminSidebar
+        activePage={activePage}
+        onPageChange={setActivePage}
         onLogout={handleLogout}
         onToggle={handleSidebarToggle}
         isCollapsed={isSidebarCollapsed}
       />
-      <AdminHeader 
-        user={userData} 
-        pageTitle={pageTitles[activePage]} 
+      <AdminHeader
+        user={userData}
+        pageTitle={pageTitles[activePage]}
         isSidebarCollapsed={isSidebarCollapsed}
         onLogout={handleLogout}
         onUserUpdate={handleUserUpdate}
       />
-      
-      <main className={`admin-main-content ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+
+      <main
+        className={`admin-main-content ${isSidebarCollapsed ? "sidebar-collapsed" : ""}`}
+      >
         {success && <div className="success-message">{success}</div>}
         {error && <div className="error-message">{error}</div>}
         {renderContent()}
       </main>
 
       {/* Hospital Modals */}
-      <HospitalModal 
-        isOpen={hospitalModal.isOpen && !hospitalModal.editingItem} 
-        onClose={closeHospitalModal} 
-        onSuccess={refreshData} 
+      <HospitalModal
+        isOpen={hospitalModal.isOpen && !hospitalModal.editingItem}
+        onClose={closeHospitalModal}
+        onSuccess={refreshData}
       />
-      <EditHospitalModal 
-        isOpen={hospitalModal.isOpen && hospitalModal.editingItem} 
-        onClose={closeHospitalModal} 
+      <EditHospitalModal
+        isOpen={hospitalModal.isOpen && hospitalModal.editingItem}
+        onClose={closeHospitalModal}
         editingHospital={hospitalModal.editingItem}
-        onSuccess={refreshData} 
+        onSuccess={refreshData}
       />
 
       {/* Doctor Modals */}
-      <DoctorModal 
-        isOpen={doctorModal.isOpen && !doctorModal.editingItem} 
-        onClose={closeDoctorModal} 
-        specializations={specializations} 
-        hospitals={hospitals} 
-        onSuccess={refreshData} 
+      <DoctorModal
+        isOpen={doctorModal.isOpen && !doctorModal.editingItem}
+        onClose={closeDoctorModal}
+        specializations={specializations}
+        hospitals={hospitals}
+        onSuccess={refreshData}
       />
-      <EditDoctorModal 
-        isOpen={doctorModal.isOpen && doctorModal.editingItem} 
-        onClose={closeDoctorModal} 
+      <EditDoctorModal
+        isOpen={doctorModal.isOpen && doctorModal.editingItem}
+        onClose={closeDoctorModal}
         editingDoctor={doctorModal.editingItem}
-        specializations={specializations} 
-        hospitals={hospitals} 
-        onSuccess={refreshData} 
+        specializations={specializations}
+        hospitals={hospitals}
+        onSuccess={refreshData}
       />
 
       {/* Patient Modal */}
-      <PatientModal 
-        isOpen={patientModal.isOpen} 
-        onClose={closePatientModal} 
+      <PatientModal
+        isOpen={patientModal.isOpen}
+        onClose={closePatientModal}
         editingPatient={patientModal.editingItem}
-        doctors={doctors} 
-        onSuccess={refreshData} 
+        doctors={doctors}
+        onSuccess={refreshData}
       />
 
       {/* Specialization Modal */}
-      <SpecializationModal 
-        isOpen={specializationModal.isOpen} 
-        onClose={closeSpecializationModal} 
+      <SpecializationModal
+        isOpen={specializationModal.isOpen}
+        onClose={closeSpecializationModal}
         editingSpecialization={specializationModal.editingItem}
-        onSuccess={refreshData} 
+        onSuccess={refreshData}
       />
 
       {/* GLOBAL Confirm Modal - SINGLE INSTANCE */}

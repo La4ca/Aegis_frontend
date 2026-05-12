@@ -1,23 +1,30 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
-import Button from '../../common/Button/Button';
-import Input from '../../common/Input/Input';
-import api from '../../../utils/api';
-import './Auth.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Heart,
+  Mail,
+  Lock,
+  User,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
+import Button from "../../common/Button/Button";
+import Input from "../../common/Input/Input";
+import api from "../../../services/api";
+import "./Auth.css";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '', 
-    lastName: '', 
-    email: '', 
-    password: ''
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -27,56 +34,61 @@ const Auth = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       if (isLogin) {
         // Login - role is determined by backend
-        const response = await api.post('/auth/login', {
+        const response = await api.post("/auth/login", {
           email: formData.email,
-          password: formData.password
+          password: formData.password,
         });
-        
+
         if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-          localStorage.setItem('userRole', response.data.user.role);
-          
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+          localStorage.setItem("userRole", response.data.user.role);
+
           // Redirect based on role
-          if (response.data.user.role === 'admin') {
-            navigate('/admin/dashboard');
-          } else if (response.data.user.role === 'doctor') {
-            navigate('/doctor/dashboard');
+          if (response.data.user.role === "admin") {
+            navigate("/admin/dashboard");
+          } else if (response.data.user.role === "doctor") {
+            navigate("/doctor/dashboard");
           } else {
-            navigate('/patient/dashboard');
+            navigate("/patient/dashboard");
           }
         }
       } else {
         // Register - always creates a patient account
-        const response = await api.post('/auth/register', {
+        const response = await api.post("/auth/register", {
           email: formData.email,
           password: formData.password,
-          role: 'patient',  // Force role to patient
+          role: "patient", // Force role to patient
           profile: {
             firstName: formData.firstName,
             lastName: formData.lastName,
-            phone: '1234567890'
-          }
+            phone: "1234567890",
+          },
         });
-        
+
         if (response.data.token) {
-          setSuccess('Account created successfully! Redirecting to login...');
+          setSuccess("Account created successfully! Redirecting to login...");
           setTimeout(() => {
             setIsLogin(true);
-            setFormData({ firstName: '', lastName: '', email: '', password: '' });
-            setSuccess('');
+            setFormData({
+              firstName: "",
+              lastName: "",
+              email: "",
+              password: "",
+            });
+            setSuccess("");
           }, 2000);
         }
       }
     } catch (err) {
-      console.error('Auth error:', err);
-      setError(err.response?.data?.message || 'Authentication failed');
+      console.error("Auth error:", err);
+      setError(err.response?.data?.message || "Authentication failed");
     } finally {
       setLoading(false);
     }
@@ -88,8 +100,8 @@ const Auth = () => {
         <div className="auth-bg-gradient"></div>
         <div className="auth-bg-pattern"></div>
       </div>
-      
-      <motion.div 
+
+      <motion.div
         className="auth-card"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -104,22 +116,22 @@ const Auth = () => {
 
         {/* Toggle Buttons */}
         <div className="auth-toggle">
-          <button 
-            className={`toggle-btn ${isLogin ? 'active' : ''}`} 
+          <button
+            className={`toggle-btn ${isLogin ? "active" : ""}`}
             onClick={() => {
               setIsLogin(true);
-              setError('');
-              setSuccess('');
+              setError("");
+              setSuccess("");
             }}
           >
             Sign In
           </button>
-          <button 
-            className={`toggle-btn ${!isLogin ? 'active' : ''}`} 
+          <button
+            className={`toggle-btn ${!isLogin ? "active" : ""}`}
             onClick={() => {
               setIsLogin(false);
-              setError('');
-              setSuccess('');
+              setError("");
+              setSuccess("");
             }}
           >
             Create Account
@@ -127,13 +139,13 @@ const Auth = () => {
         </div>
 
         <AnimatePresence mode="wait">
-          <motion.form 
-            key={isLogin ? 'login' : 'register'}
+          <motion.form
+            key={isLogin ? "login" : "register"}
             initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
             transition={{ duration: 0.3 }}
-            className="auth-form" 
+            className="auth-form"
             onSubmit={handleSubmit}
           >
             {error && (
@@ -142,7 +154,7 @@ const Auth = () => {
                 {error}
               </div>
             )}
-            
+
             {success && (
               <div className="alert alert-success">
                 <CheckCircle size={16} />
@@ -152,16 +164,16 @@ const Auth = () => {
 
             {!isLogin && (
               <div className="name-row">
-                <Input 
-                  name="firstName" 
-                  placeholder="First Name" 
+                <Input
+                  name="firstName"
+                  placeholder="First Name"
                   value={formData.firstName}
                   onChange={handleChange}
                   required
                 />
-                <Input 
-                  name="lastName" 
-                  placeholder="Last Name" 
+                <Input
+                  name="lastName"
+                  placeholder="Last Name"
                   value={formData.lastName}
                   onChange={handleChange}
                   required
@@ -169,7 +181,7 @@ const Auth = () => {
               </div>
             )}
 
-            <Input 
+            <Input
               type="email"
               name="email"
               label="Email Address"
@@ -180,7 +192,7 @@ const Auth = () => {
               required
             />
 
-            <Input 
+            <Input
               type="password"
               name="password"
               label="Password"
@@ -201,7 +213,7 @@ const Auth = () => {
             )}
 
             <Button type="submit" variant="primary" fullWidth loading={loading}>
-              {isLogin ? 'Sign In' : 'Create Patient Account'}
+              {isLogin ? "Sign In" : "Create Patient Account"}
             </Button>
           </motion.form>
         </AnimatePresence>
@@ -209,19 +221,20 @@ const Auth = () => {
         <div className="auth-footer">
           <p className="footer-text">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <button 
+            <button
               onClick={() => {
                 setIsLogin(!isLogin);
-                setError('');
-                setSuccess('');
+                setError("");
+                setSuccess("");
               }}
               className="switch-btn"
             >
-              {isLogin ? 'Create Account' : 'Sign In'}
+              {isLogin ? "Create Account" : "Sign In"}
             </button>
           </p>
           <p className="doctor-note">
-            👨‍⚕️ Are you a doctor? Accounts are created by hospital administrators.
+            👨‍⚕️ Are you a doctor? Accounts are created by hospital
+            administrators.
           </p>
         </div>
       </motion.div>
