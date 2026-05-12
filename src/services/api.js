@@ -2,8 +2,18 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 
+// Use Render URL in production, localhost in development
+const getBaseURL = () => {
+  // If running on Vercel (production), use the Render backend
+  if (process.env.NODE_ENV === "production") {
+    return "https://aegisapi-mkic.onrender.com/api";
+  }
+  // Otherwise (development), use localhost
+  return process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+};
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
+  baseURL: getBaseURL(),
   headers: { "Content-Type": "application/json" },
   timeout: 30000,
 });
