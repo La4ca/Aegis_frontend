@@ -1,4 +1,4 @@
-/* NotificationBell.css - Consistent with header */
+/* NotificationBell.css */
 .notification-bell-container {
   position: relative;
 }
@@ -37,19 +37,22 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Dropdown */
+/* Dropdown uses position:fixed so it escapes any overflow:hidden
+   or stacking context created by the header in every role. */
 .notification-dropdown {
-  position: absolute;
-  top: 45px;
-  right: 0;
+  position: fixed;
   width: 380px;
   max-height: 500px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  box-shadow: 0 10px 40px -5px rgba(0, 0, 0, 0.18),
+              0 4px 16px -2px rgba(0, 0, 0, 0.08);
+  /* Must sit above every header (admin: 90, patient: 100, doctor: 1100)
+     and the mobile drawer overlay (2000) */
+  z-index: 9999;
   overflow: hidden;
   border: 1px solid #E2E8F0;
+  /* top / right are calculated and set as inline styles in NotificationBell.jsx */
 }
 
 .notification-header {
@@ -115,10 +118,12 @@
   font-size: 18px;
   width: 32px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .notification-content {
   flex: 1;
+  min-width: 0;
 }
 
 .notification-title {
@@ -133,6 +138,7 @@
   color: #64748B;
   margin-bottom: 4px;
   line-height: 1.4;
+  word-break: break-word;
 }
 
 .notification-time {
@@ -156,10 +162,8 @@
   font-size: 13px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .notification-dropdown {
-    width: calc(100vw - 32px);
-    right: -100px;
+    width: calc(100vw - 24px);
   }
 }
