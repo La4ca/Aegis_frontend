@@ -47,8 +47,6 @@ export const generatePrescriptionPDF = async (prescription) => {
           <div>
             <div style="font-size: 11px; font-weight: 600; color: #64748B; text-transform: uppercase; margin-bottom: 6px;">Prescribing Doctor</div>
             <div style="font-size: 16px; font-weight: 600; color: #0A0F1D;">${doctorName || 'Unknown Doctor'}</div>
-            <div style="font-size: 12px; color: #64748B; margin-top: 4px;">License: ${doctorLicense}</div>
-            <div style="font-size: 12px; color: #64748B;">Specialization: ${doctorSpecialization}</div>
           </div>
         </div>
         
@@ -95,7 +93,6 @@ export const generatePrescriptionPDF = async (prescription) => {
             <div>
               <p style="font-size: 10px; color: #94A3B8;">Electronically Prescribed by:</p>
               <p style="font-size: 12px; font-weight: 500; color: #0A0F1D;">${doctorName}</p>
-              <p style="font-size: 10px; color: #64748B;">License: ${doctorLicense}</p>
             </div>
             <div style="text-align: right;">
               <p style="font-size: 10px; color: #94A3B8;">Valid Without Signature</p>
