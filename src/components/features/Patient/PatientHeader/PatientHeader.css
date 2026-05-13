@@ -320,3 +320,49 @@
     display: none !important;
   }
 }
+
+/* Mobile notification dropdown – fully responsive */
+@media (max-width: 768px) {
+  /* Target the dropdown container (adjust selector if needed) */
+  .notification-bell-wrapper .notification-dropdown,
+  .notification-dropdown {
+    position: fixed;
+    top: 60px !important; /* below header, adjust if header height differs */
+    right: 8px !important;
+    left: auto !important;
+    width: calc(100vw - 32px) !important;
+    max-width: 360px !important;
+    min-width: 260px !important;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  /* Adjust inner elements for smaller screens */
+  .notification-item {
+    padding: 12px !important;
+  }
+  .notification-title {
+    font-size: 14px !important;
+  }
+  .notification-message {
+    font-size: 12px !important;
+    line-height: 1.4;
+  }
+  .notification-time {
+    font-size: 10px !important;
+  }
+
+  /* For very small devices (320px and below) */
+  @media (max-width: 360px) {
+    .notification-dropdown {
+      width: calc(100vw - 24px) !important;
+      right: 12px !important;
+    }
+    .notification-item {
+      padding: 10px !important;
+    }
+  }
+}

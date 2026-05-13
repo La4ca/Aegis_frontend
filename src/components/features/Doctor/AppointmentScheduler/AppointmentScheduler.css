@@ -609,7 +609,7 @@
     align-items: flex-start;
   }
   .header-actions {
-    width: 100%;
+    /* width: 100%; */
     justify-content: space-between;
   }
   .stats-grid {
