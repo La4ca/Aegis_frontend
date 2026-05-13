@@ -8,6 +8,7 @@ export const NotificationBell = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const dropdownRef = useRef(null);
   const bellRef = useRef(null);
 
@@ -39,28 +40,30 @@ export const NotificationBell = () => {
     }
   };
 
-  // Calculate the fixed position of the dropdown relative to the bell button
+  // Track mobile breakpoint
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Calculate fixed position for desktop dropdown
   const calculateDropdownPos = useCallback(() => {
     if (!bellRef.current) return;
     const rect = bellRef.current.getBoundingClientRect();
-    const dropdownWidth = window.innerWidth <= 480 ? window.innerWidth - 24 : 380;
     const rightEdge = window.innerWidth - rect.right;
-    // Clamp so it never goes off-screen on the left
-    const clampedRight = Math.max(8, rightEdge);
     setDropdownPos({
       top: rect.bottom + 8,
-      right: clampedRight,
+      right: Math.max(8, rightEdge),
     });
   }, []);
 
   const handleToggle = () => {
-    if (!isOpen) {
-      calculateDropdownPos();
-    }
+    if (!isOpen) calculateDropdownPos();
     setIsOpen((prev) => !prev);
   };
 
-  // Close dropdown when clicking outside
+  // Close on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -76,19 +79,19 @@ export const NotificationBell = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Recalculate position on scroll or resize so dropdown follows the bell
+  // Recalculate on scroll / resize (desktop only)
   useEffect(() => {
-    if (!isOpen) return;
-    const handleReposition = () => calculateDropdownPos();
-    window.addEventListener('scroll', handleReposition, true);
-    window.addEventListener('resize', handleReposition);
+    if (!isOpen || isMobile) return;
+    const reposition = () => calculateDropdownPos();
+    window.addEventListener('scroll', reposition, true);
+    window.addEventListener('resize', reposition);
     return () => {
-      window.removeEventListener('scroll', handleReposition, true);
-      window.removeEventListener('resize', handleReposition);
+      window.removeEventListener('scroll', reposition, true);
+      window.removeEventListener('resize', reposition);
     };
-  }, [isOpen, calculateDropdownPos]);
+  }, [isOpen, isMobile, calculateDropdownPos]);
 
-  // Poll for new notifications every 10 seconds
+  // Poll every 10 s
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 10000);
@@ -112,7 +115,6 @@ export const NotificationBell = () => {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
@@ -136,47 +138,64 @@ export const NotificationBell = () => {
       </button>
 
       {isOpen && (
-        <div
-          className="notification-dropdown"
-          ref={dropdownRef}
-          style={{ top: dropdownPos.top, right: dropdownPos.right }}
-        >
-          <div className="notification-header">
-            <h4>Notifications</h4>
-            {unreadCount > 0 && (
-              <button className="mark-all-read" onClick={markAllRead}>
-                <CheckCheck size={16} /> Mark all read
-              </button>
-            )}
-          </div>
-          <div className="notification-list">
-            {notifications.length === 0 ? (
-              <div className="notification-empty">No notifications</div>
-            ) : (
-              notifications.map((notif) => (
-                <div
-                  key={notif._id}
-                  className={`notification-item ${!notif.isRead ? 'unread' : ''}`}
-                  onClick={() => !notif.isRead && markAsRead(notif._id)}
-                >
-                  <div className="notification-icon">
-                    {getNotificationIcon(notif.type)}
-                  </div>
-                  <div className="notification-content">
-                    <div className="notification-title">{notif.title}</div>
-                    <div className="notification-message">{notif.message}</div>
-                    <div className="notification-time">
-                      {formatTime(notif.createdAt)}
+        <>
+          {/* Backdrop — visible on mobile so tapping outside closes it */}
+          {isMobile && (
+            <div
+              className="notification-backdrop"
+              onClick={() => setIsOpen(false)}
+            />
+          )}
+
+          <div
+            className="notification-dropdown"
+            ref={dropdownRef}
+            /* On desktop use the JS-calculated position;
+               on mobile the CSS overrides these with !important */
+            style={
+              !isMobile
+                ? { top: dropdownPos.top, right: dropdownPos.right }
+                : {}
+            }
+          >
+            <div className="notification-header">
+              <h4>Notifications</h4>
+              {unreadCount > 0 && (
+                <button className="mark-all-read" onClick={markAllRead}>
+                  <CheckCheck size={16} /> Mark all read
+                </button>
+              )}
+            </div>
+
+            <div className="notification-list">
+              {notifications.length === 0 ? (
+                <div className="notification-empty">No notifications</div>
+              ) : (
+                notifications.map((notif) => (
+                  <div
+                    key={notif._id}
+                    className={`notification-item ${!notif.isRead ? 'unread' : ''}`}
+                    onClick={() => !notif.isRead && markAsRead(notif._id)}
+                  >
+                    <div className="notification-icon">
+                      {getNotificationIcon(notif.type)}
                     </div>
+                    <div className="notification-content">
+                      <div className="notification-title">{notif.title}</div>
+                      <div className="notification-message">{notif.message}</div>
+                      <div className="notification-time">
+                        {formatTime(notif.createdAt)}
+                      </div>
+                    </div>
+                    {!notif.isRead && (
+                      <div className="notification-unread-dot"></div>
+                    )}
                   </div>
-                  {!notif.isRead && (
-                    <div className="notification-unread-dot"></div>
-                  )}
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

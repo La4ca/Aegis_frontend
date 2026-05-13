@@ -37,8 +37,8 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Dropdown uses position:fixed so it escapes any overflow:hidden
-   or stacking context created by the header in every role. */
+/* ── DESKTOP DROPDOWN ─────────────────────────────────────────── */
+/* position:fixed so it escapes overflow:hidden on any header     */
 .notification-dropdown {
   position: fixed;
   width: 380px;
@@ -47,14 +47,39 @@
   border-radius: 12px;
   box-shadow: 0 10px 40px -5px rgba(0, 0, 0, 0.18),
               0 4px 16px -2px rgba(0, 0, 0, 0.08);
-  /* Must sit above every header (admin: 90, patient: 100, doctor: 1100)
-     and the mobile drawer overlay (2000) */
   z-index: 9999;
   overflow: hidden;
   border: 1px solid #E2E8F0;
-  /* top / right are calculated and set as inline styles in NotificationBell.jsx */
+  /* top / right set as inline styles via JS in NotificationBell.jsx */
 }
 
+/* ── MOBILE: full-width bottom-anchored panel ─────────────────── */
+@media (max-width: 768px) {
+  /* Dark backdrop */
+  .notification-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 9998;
+  }
+
+  .notification-dropdown {
+    /* Override the JS-set top/right — pin to top of screen with
+       full width and scroll down from the header */
+    top: 60px !important;
+    right: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw;
+    border-radius: 0 0 16px 16px;
+    max-height: calc(100vh - 60px);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+}
+
+/* ── SHARED INNER STYLES ─────────────────────────────────────── */
 .notification-header {
   display: flex;
   justify-content: space-between;
@@ -93,6 +118,12 @@
 .notification-list {
   max-height: 400px;
   overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .notification-list {
+    max-height: calc(100vh - 130px);
+  }
 }
 
 .notification-item {
@@ -160,10 +191,4 @@
   padding: 48px 20px;
   color: #94A3B8;
   font-size: 13px;
-}
-
-@media (max-width: 480px) {
-  .notification-dropdown {
-    width: calc(100vw - 24px);
-  }
 }
