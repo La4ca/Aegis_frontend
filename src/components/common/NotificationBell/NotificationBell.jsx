@@ -57,11 +57,23 @@ export const NotificationBell = () => {
 
   const getNotificationIcon = (type) => {
     switch(type) {
-      case 'referral_received': return '🩺';
-      case 'referral_accepted': return '✅';
-      case 'referral_denied': return '❌';
-      case 'doctor_assigned': return '👨‍⚕️';
-      default: return '📢';
+      case 'vitals_alert':          return '⚠️';
+      case 'vitals_recorded':       return '❤️';
+      case 'appointment_scheduled': return '📅';
+      case 'appointment_updated':   return '📅';
+      case 'appointment_cancelled': return '❌';
+      case 'appointment':           return '📅';
+      case 'referral_received':     return '🩺';
+      case 'referral_accepted':     return '✅';
+      case 'referral_denied':       return '❌';
+      case 'referral_responded':    return '🩺';
+      case 'prescription_created':  return '💊';
+      case 'prescription':          return '💊';
+      case 'condition_added':       return '📋';
+      case 'doctor_assigned':       return '👨‍⚕️';
+      case 'profile_update':        return '👤';
+      case 'welcome':               return '👋';
+      default:                      return '📢';
     }
   };
 

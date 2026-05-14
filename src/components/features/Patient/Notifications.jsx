@@ -1,72 +1,109 @@
-import React, { useState, useEffect } from "react";
-import { Bell, Check, X, AlertCircle, Heart } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Bell, CheckCheck } from "lucide-react";
 import api from "../../../services/api";
 import "./Notifications.css";
 
-const Notifications = ({ patientId, onNotificationAction }) => {
+const Notifications = ({ onNotificationAction }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [pendingRequest, setPendingRequest] = useState(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     fetchNotifications();
-  }, [patientId]);
+    // Poll every 10 seconds for new notifications
+    const interval = setInterval(fetchNotifications, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const fetchNotifications = async () => {
     try {
-      const response = await api.get(`/patients/${patientId}/notifications`);
-      setNotifications(response.data.notifications);
-      setUnreadCount(response.data.unreadCount);
-      if (response.data.pendingDoctorChange?.status === "pending") {
-        setPendingRequest(response.data.pendingDoctorChange);
-      }
+      const response = await api.get("/notifications?limit=20");
+      setNotifications(response.data.notifications || []);
+      setUnreadCount(response.data.unreadCount || 0);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
 
-  const handleApprove = async (notification) => {
-    try {
-      await api.post(`/patients/${patientId}/approve-doctor-change`);
-      await fetchNotifications();
-      if (onNotificationAction) onNotificationAction();
-      alert("Doctor changed successfully!");
-    } catch (error) {
-      console.error("Error approving:", error);
-    }
-  };
-
-  const handleReject = async (notification) => {
-    try {
-      await api.post(`/patients/${patientId}/reject-doctor-change`);
-      await fetchNotifications();
-      if (onNotificationAction) onNotificationAction();
-    } catch (error) {
-      console.error("Error rejecting:", error);
-    }
-  };
-
   const handleMarkRead = async (notificationId) => {
     try {
-      await api.patch(
-        `/patients/${patientId}/notifications/${notificationId}/read`,
-      );
+      await api.patch(`/notifications/${notificationId}/read`);
       fetchNotifications();
+      if (onNotificationAction) onNotificationAction();
     } catch (error) {
       console.error("Error marking read:", error);
     }
   };
 
+  const handleMarkAllRead = async () => {
+    try {
+      await api.patch("/notifications/mark-all-read");
+      fetchNotifications();
+      if (onNotificationAction) onNotificationAction();
+    } catch (error) {
+      console.error("Error marking all read:", error);
+    }
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case "vitals_alert":          return "⚠️";
+      case "vitals_recorded":       return "❤️";
+      case "appointment_scheduled": return "📅";
+      case "appointment_updated":   return "📅";
+      case "appointment_cancelled": return "❌";
+      case "appointment":           return "📅";
+      case "referral_received":     return "🩺";
+      case "referral_accepted":     return "✅";
+      case "referral_denied":       return "❌";
+      case "referral_responded":    return "🩺";
+      case "prescription_created":  return "💊";
+      case "prescription":          return "💊";
+      case "condition_added":       return "📋";
+      case "doctor_assigned":       return "👨‍⚕️";
+      case "profile_update":        return "👤";
+      case "welcome":               return "👋";
+      default:                      return "📢";
+    }
+  };
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
+
   return (
-    <div className="notifications-container">
+    <div className="notifications-container" ref={dropdownRef}>
       <button
         className="notification-bell"
         onClick={() => setShowDropdown(!showDropdown)}
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="notification-badge">{unreadCount}</span>
+          <span className="notification-badge">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
         )}
       </button>
 
@@ -74,55 +111,52 @@ const Notifications = ({ patientId, onNotificationAction }) => {
         <div className="notification-dropdown">
           <div className="notification-header">
             <h4>Notifications</h4>
-            {notifications.length === 0 && (
-              <p className="no-notifications">No notifications</p>
+            {unreadCount > 0 && (
+              <button className="mark-read-btn" onClick={handleMarkAllRead}>
+                <CheckCheck size={14} /> Mark all read
+              </button>
             )}
           </div>
+
           <div className="notification-list">
-            {notifications.map((notif) => (
-              <div
-                key={notif._id}
-                className={`notification-item ${!notif.isRead ? "unread" : ""}`}
-              >
-                <div className="notification-icon">
-                  {notif.type === "doctor_change_request" && <Bell size={16} />}
-                  {notif.type === "doctor_change_approved" && (
-                    <Check size={16} />
-                  )}
-                  {notif.type === "vital_recorded" && <Heart size={16} />}
-                </div>
-                <div className="notification-content">
-                  <p>{notif.message}</p>
-                  <span className="notification-time">
-                    {new Date(notif.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                {notif.type === "doctor_change_request" && (
-                  <div className="notification-actions">
-                    <button
-                      className="approve-btn"
-                      onClick={() => handleApprove(notif)}
-                    >
-                      <Check size={14} /> Approve
-                    </button>
-                    <button
-                      className="reject-btn"
-                      onClick={() => handleReject(notif)}
-                    >
-                      <X size={14} /> Decline
-                    </button>
+            {notifications.length === 0 ? (
+              <p className="no-notifications">No notifications</p>
+            ) : (
+              notifications.map((notif) => (
+                <div
+                  key={notif._id}
+                  className={`notification-item ${!notif.isRead ? "unread" : ""}`}
+                  onClick={() => !notif.isRead && handleMarkRead(notif._id)}
+                >
+                  <div className="notification-icon">
+                    {getNotificationIcon(notif.type)}
                   </div>
-                )}
-                {!notif.isRead && notif.type !== "doctor_change_request" && (
-                  <button
-                    className="mark-read-btn"
-                    onClick={() => handleMarkRead(notif._id)}
-                  >
-                    Mark read
-                  </button>
-                )}
-              </div>
-            ))}
+                  <div className="notification-content">
+                    {notif.title && (
+                      <p style={{ fontWeight: 600, marginBottom: 2 }}>
+                        {notif.title}
+                      </p>
+                    )}
+                    <p>{notif.message}</p>
+                    <span className="notification-time">
+                      {formatTime(notif.createdAt)}
+                    </span>
+                  </div>
+                  {!notif.isRead && (
+                    <div
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        background: "#3B82F6",
+                        flexShrink: 0,
+                        marginTop: 6,
+                      }}
+                    />
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
